@@ -92,3 +92,31 @@ func TestWeightedRefusesABillItCannotSplit(t *testing.T) {
 		}
 	}
 }
+
+func TestWithTip(t *testing.T) {
+	for _, check := range []struct {
+		total   Cents
+		percent int
+		want    Cents
+	}{
+		{10000, 0, 10000},
+		{10000, 15, 11500},
+		{1234, 10, 1357},
+		{1235, 10, 1359},
+		{1, 50, 2},
+		{0, 20, 0},
+	} {
+		got, err := WithTip(check.total, check.percent)
+		if err != nil || got != check.want {
+			t.Errorf("WithTip(%s, %d) = %s, %v, want %s", check.total, check.percent, got, err, check.want)
+		}
+	}
+	for _, percent := range []int{-1, 101} {
+		if _, err := WithTip(100, percent); err == nil {
+			t.Errorf("WithTip(1.00, %d) took the tip", percent)
+		}
+	}
+	if _, err := WithTip(-1, 10); err == nil {
+		t.Error("WithTip took a negative total")
+	}
+}

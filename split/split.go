@@ -113,3 +113,16 @@ func Weighted(total Cents, people []string, weights map[string]int) ([]Share, er
 	}
 	return shares, nil
 }
+
+// WithTip adds a tip of percent to total, rounded to the nearest cent, halves
+// up. percent is a whole number from 0 to 100.
+func WithTip(total Cents, percent int) (Cents, error) {
+	if total < 0 {
+		return 0, fmt.Errorf("split: the total %s is negative", total)
+	}
+	if percent < 0 || percent > 100 {
+		return 0, fmt.Errorf("split: a tip of %d%% is outside 0 to 100", percent)
+	}
+	tip := (int64(total)*int64(percent) + 50) / 100
+	return total + Cents(tip), nil
+}

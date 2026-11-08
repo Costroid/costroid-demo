@@ -1,0 +1,44 @@
+# Posts the costroid check and comment on a fork's pull request from a recorded
+# run, so a stranger's pull request shows what Costroid reports without
+# spending a key. The rows in recorded/rows.jsonl are workflow run
+# 42368537950's, recorded on 2026-11-07, and the comment's first line says the
+# figures are that run's, not the pull request's. A fork's own run holds a
+# read-only token, so this job runs after it, in this repository.
+name: costroid-recorded
+
+on:
+  workflow_run:
+    # The name of the agent's workflow, .github/workflows/costroid.yml.
+    workflows: [costroid]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  report:
+    # A fork's pull request only. A branch of this repository runs the agent.
+    if: >-
+      github.event.workflow_run.event == 'pull_request'
+      && github.event.workflow_run.head_repository.full_name != github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      checks: write
+      # Reads the recording and costroid.yml at the default branch, and the
+      # branches whose head is the fork's head commit.
+      contents: read
+      # Finds the fork's open pull request by its branch, and comments on it.
+      pull-requests: write
+    steps:
+      # The default branch's recording, never the pull request's code.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: recorded
+      - uses: Costroid/costroid/action@bd747c80573f04fc03cbd37873f2678a2aad0aa2 # v1.0.0-alpha.14
+        with:
+          stage: install
+      - name: Post the recorded run's report
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: costroid report --rows recorded/rows.jsonl --recorded 42368537950,2026-11-07

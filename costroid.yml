@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Costroid/costroid/main/costroid.schema.json
+# The repository's one Costroid configuration file. Every key is optional, and a
+# repository with no file gets the defaults. The report reads this file at the
+# head of the pull request's base branch, so a pull request cannot change its
+# own settings. To set a key, remove the # before it and before each key it sits
+# under. costroid validate checks the file.
+
+# The sticky comment on a pull request.
+# comment:
+#   # Whether a public repository's comment prints amounts. Off, it shows the
+#   # verdict and the grades, and the rows and the check run's machine block
+#   # keep the amounts. A private repository always prints them.
+#   show_cost: true
+
+# What the check holds each run to. The report reads these keys at the head of
+# the pull request's base branch, so a pull request cannot change its own
+# verdict.
+policy:
+  # The budget each run is held to, in USD, as a whole number or a quoted
+  # decimal. A run over it warns during the warn-only period and fails after
+  # it. Rows the agent's job wrote cannot show a run under it, so on that path
+  # the rule concludes neutral at best.
+  run_budget_usd: 5
+#   # A ceiling on one run's cost at list, in USD, as a whole number or a quoted
+#   # decimal. It is held the same way as the budget.
+#   max_run_cost_usd:
+#   # How far a run may cost more than the median of this agent's earlier runs,
+#   # in USD, as a whole number or a quoted decimal. The rule needs 10 or more
+#   # earlier runs, and until a baseline reaches the check it does not run.
+#   max_increase_usd:
+#   # How far a run may cost more than the median of this agent's earlier runs,
+#   # in percent, as a whole number or a quoted decimal. The rule needs 10 or
+#   # more earlier runs, and until a baseline reaches the check it does not run.
+#   max_increase_percent:
+#   # The budget a pull request's runs are held to together, in USD, as a whole
+#   # number or a quoted decimal. The report adds this run to the total of the
+#   # pull request's earlier runs, read from their costroid check runs. Where
+#   # that total cannot be read, or may count one report twice, the rule
+#   # concludes unproven.
+#   pr_budget_usd:
+#   # The budget the repository's runs are held to over a calendar month, in
+#   # USD, as a whole number or a quoted decimal. The month to date comes only
+#   # from a ledger, and none reaches the check yet, so the rule does not run.
+#   monthly_budget_usd:
+#   # The models a run may use: exact model ids, or a prefix that ends in *. A
+#   # run that used another model warns during the warn-only period and fails
+#   # after it.
+#   models:
+#   # true ends the warn-only period now, so a rule that fails fails the check.
+#   # Without it the period runs for 7 days from the commit that added the
+#   # workflow to the base branch.
+#   enforce: false
+
+# Who can turn a failed check neutral by approving the pull request in a review,
+# and for how long. A review counts only on the pull request's head commit, from
+# an account that can write to the repository and is not an App. The report and
+# costroid approve read these keys at the head of the pull request's base
+# branch.
+# approval:
+#   # Whether the pull request's author can approve it.
+#   allow_author: false
+#   # How many days after it was submitted a review approves the head it names.
+#   # A new push ends an approval sooner.
+#   expires_days: 7
